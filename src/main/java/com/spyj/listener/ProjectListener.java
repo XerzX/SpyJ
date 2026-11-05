@@ -18,11 +18,13 @@ public class ProjectListener implements PackageListener {
 
     private BlueJ bluej;
     private SpyJLogger sjLogger;
+    private ClassListener cListener;
     private HashSet<File> openedProjectsByDir;
 
-    public ProjectListener (BlueJ bluej, SpyJLogger sjLogger) {
+    public ProjectListener (BlueJ bluej, SpyJLogger sjLogger, ClassListener cListener) {
         this.bluej = bluej;
         this.sjLogger = sjLogger;
+        this.cListener = cListener;
         this.openedProjectsByDir = new HashSet<>();
     }
 
@@ -32,6 +34,8 @@ public class ProjectListener implements PackageListener {
             BProject currProject = e.getPackage().getProject();
             File projectDir = currProject.getDir();
 
+            cListener.addExistingClasses(currPackage);
+            
             if (!openedProjectsByDir.contains(projectDir)) {
                 openedProjectsByDir.add(projectDir);
                 HashMap<String, Object> currProjectDetails = new HashMap<>();
