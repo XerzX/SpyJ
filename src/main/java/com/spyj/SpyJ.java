@@ -6,11 +6,11 @@ import bluej.extensions2.Extension;
 public class SpyJ extends Extension {
 
     public void startup (BlueJ bluej) {
-
+        
     }
 
     public void terminate () {
-        
+
     }
 
     public boolean isCompatible () {
