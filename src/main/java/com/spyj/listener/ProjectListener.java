@@ -41,9 +41,9 @@ public class ProjectListener implements PackageListener {
                 HashMap<String, Object> currProjectDetails = new HashMap<>();
 
                 currProjectDetails.put("Project", currProject.getName());
-                currProjectDetails.put("Project-Directory", currProject.getDir().getAbsolutePath());
-                currProjectDetails.put("Project-Structure", currProject.toString());
-                currProjectDetails.put("Current-Package-Opened", currPackage.getName());
+                currProjectDetails.put("Project Directory", currProject.getDir().getAbsolutePath());
+                currProjectDetails.put("Project Structure", currProject.toString());
+                currProjectDetails.put("Current Package Opened", currPackage.getName());
                 
                 sjLogger.recordEvent(EventType.PROJECT_OPENED, currProjectDetails);
             }
@@ -64,7 +64,7 @@ public class ProjectListener implements PackageListener {
                     openedProjectsByDir.remove(pDir);
                     HashMap<String, Object> closedProjectDetails = new HashMap<>();
                     closedProjectDetails.put("Project", projectName);
-                    closedProjectDetails.put("Project-Directory", pDir.getAbsolutePath());
+                    closedProjectDetails.put("Project Directory", pDir.getAbsolutePath());
                     sjLogger.recordEvent(EventType.PROJECT_CLOSED, closedProjectDetails);
                 }
             });
