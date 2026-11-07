@@ -14,11 +14,11 @@ import bluej.extensions2.event.CompileListener;
 
 public class CompilationListener implements CompileListener {
 
-    private SpyJLogger sJLogger;
+    private SpyJLogger sjLogger;
     private Instant startTime;
 
     public CompilationListener (SpyJLogger sJLogger) {
-        this.sJLogger = sJLogger;
+        this.sjLogger = sJLogger;
     }
 
     public void compileStarted (CompileEvent e) {
@@ -42,7 +42,7 @@ public class CompilationListener implements CompileListener {
                 compileDetails.put("Compiled Files", compileEventFiles);
             }
 
-            sJLogger.recordEvent(eventType, compileDetails);
+            sjLogger.recordEvent(eventType, compileDetails);
             startTime = null;
         }
     }
@@ -62,7 +62,7 @@ public class CompilationListener implements CompileListener {
         compileWarningDetails.put("Warning Message", e.getErrorMessage());
         compileWarningDetails.put("Warning Position", e.getErrorPosition());
 
-        sJLogger.recordEvent(EventType.COMPILE_WARNING, compileWarningDetails);
+        sjLogger.recordEvent(EventType.COMPILE_WARNING, compileWarningDetails);
     }
 
     public void compileError (CompileEvent e) {
@@ -72,7 +72,7 @@ public class CompilationListener implements CompileListener {
         compileErrorDetails.put("Error Message", e.getErrorMessage());
         compileErrorDetails.put("Error Position", e.getErrorPosition());
         
-        sJLogger.recordEvent(EventType.COMPILE_ERROR, compileErrorDetails);
+        sjLogger.recordEvent(EventType.COMPILE_ERROR, compileErrorDetails);
     }
 
 }
