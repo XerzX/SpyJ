@@ -38,8 +38,7 @@ public class PDFFormatter implements LogFormatter{
         PDPage page=new PDPage(PDRectangle.A4);
         document.addPage(page);
 
-        try (PDPageContentStream content= 
-            new PDPageContentStream(document, page)){
+        try (PDPageContentStream content= new PDPageContentStream(document, page)){
         writeLine(content,"SPYJ Session Report", 50,790,20);
 
         String[][] fields = {
@@ -78,9 +77,77 @@ public class PDFFormatter implements LogFormatter{
                     successRate=String.format(java.util.Locale.ROOT,"%.1f%%", percentage);
             }
             writeLine(content, "Compilation success rate: "+successRate,50,y,11);
-            writeLine(content, "Page 1 of 2", 50, 40, 10);
-            }
+            
+            //Draws the compilation chart
+            drawCompilationChart(content, summary);
+            drawActivityChart(content,summary);
+            writeLine(content,"Page 1 of 2", 50,40,10);
+        }
     }
+
+    // Draws successful and failed compilation counts.
+    private void drawCompilationChart( PDPageContentStream content,Map<String, Object> summary) throws IOException {
+
+        writeLine(content, "Compilation Results", 50, 380, 16);
+
+        Number successful =
+                (Number) summary.get("successful_compilations");
+        Number failed =
+                (Number) summary.get("failed_compilations");
+
+        if (successful == null || failed == null) {
+            writeLine(content, "Compilation data unavailable.", 50, 350, 11);
+            return;
+        }
+
+        long successCount = successful.longValue();
+        long failedCount = failed.longValue();
+
+        if (successCount < 0 || failedCount < 0) {
+            writeLine(content, "Invalid compilation counts.", 50, 350, 11);
+            return;
+        }
+
+        long maximum = Math.max(successCount, failedCount);
+
+        if (maximum == 0) {
+            writeLine(content, "No compilations recorded.", 50, 350, 11);
+            return;
+        }
+
+        // Both bars use the same scale, starting from zero.
+        float successWidth = (float) (successCount / (double) maximum * 280);
+        float failedWidth = (float) (failedCount / (double) maximum * 280);
+
+        writeLine(content, "Successful", 50, 340, 11);
+        writeLine(content, "Failed", 50, 300, 11);
+
+        content.saveGraphicsState();
+
+        // Draws the successful compilation bar.
+        content.setNonStrokingColor(0.15f, 0.55f, 0.35f);
+        if (successCount > 0) {
+            content.addRect(150, 334, successWidth, 18);
+            content.fill();
+        }
+
+        // Draws the failed compilation bar.
+        content.setNonStrokingColor(0.75f, 0.20f, 0.20f);
+        if (failedCount > 0) {
+            content.addRect(150, 294, failedWidth, 18);
+            content.fill();
+        }
+
+        content.restoreGraphicsState();
+
+        // Shows the exact counts beside the bars.
+        writeLine(content, Long.toString(successCount), 445, 340, 11);
+        writeLine(content, Long.toString(failedCount), 445, 300, 11);
+
+        writeLine(content, "Bar length represents compilation count.", 50, 270, 9);
+     }
+
+
     //Creates the second page with recorded events
     private void addEventsPage(PDDocument document,List<TelemetryEvent>events) throws IOException{
         
@@ -174,6 +241,63 @@ public class PDFFormatter implements LogFormatter{
         }
     }
 
+    //Draws active and the idle time
+    private void drawActivityChart(PDPageContentStream content,Map<String,Object>summary) throws IOException{
+        writeLine(content, "Active and Idle Time", 50,230,16);
+        
+        Number active = (Number) summary.get("active_time");
+        Number idle = (Number) summary.get("idle_time");
+
+        if (active == null || idle == null) {
+            writeLine(content, "Activity data unavailable.", 50, 200, 11);
+            return;
+        }
+
+        long activeTime = active.longValue();
+        long idleTime = idle.longValue();
+
+        if (activeTime < 0 || idleTime < 0) {
+            writeLine(content, "Invalid activity durations.", 50, 200, 11);
+            return;
+        }
+
+        long maximum = Math.max(activeTime, idleTime);
+
+        if (maximum == 0) {
+            writeLine(content, "No activity duration recorded.", 50, 200, 11);
+            return;
+        }
+
+        // Uses the same scale for both bars.
+        float activeWidth = (float) (activeTime / (double) maximum * 280);
+        float idleWidth = (float) (idleTime / (double) maximum * 280);
+
+        writeLine(content, "Active", 50, 190, 11);
+        writeLine(content, "Idle", 50, 150, 11);
+
+        content.saveGraphicsState();
+
+        // Draws active time in blue.
+        content.setNonStrokingColor(0.20f, 0.45f, 0.75f);
+        if (activeTime > 0) {
+            content.addRect(150, 184, activeWidth, 18);
+            content.fill();
+        }
+
+        // Draws idle time in grey.
+        content.setNonStrokingColor(0.55f, 0.55f, 0.55f);
+        if (idleTime > 0) {
+            content.addRect(150, 144, idleWidth, 18);
+            content.fill();
+        }
+
+        content.restoreGraphicsState();
+
+        writeLine(content, activeTime + " ms", 445, 190, 10);
+        writeLine(content, idleTime + " ms", 445, 150, 10);
+
+        writeLine(content, "Bar length represents time in milliseconds.", 50, 115, 9);
+    }
 
     // Writes one line of text that fits within the page.
     private void writeLine(PDPageContentStream content, String text, float x, float y, int size) throws IOException {
