@@ -35,7 +35,7 @@ public class FormattingDemo{
         events.add(new TelemetryEvent(EventType.COMPILE_ERROR, firstError));
         
         //Adds a different error
-         Map<String, Object> secondError= new LinkedHashMap<>();
+         Map<String,Object> secondError= new LinkedHashMap<>();
          secondError.put("Error Message","';' expected");
          secondError.put("Error Start Line",8);
 
@@ -57,8 +57,8 @@ public class FormattingDemo{
         summary.put("session_duration",java.time.Duration.between(start,end).toMillis());
 
         //These values are unavailable until activity tracking is ready
-        summary.put("active_time",null);
-        summary.put("idle_time",null);
+        summary.put("active_time",6000L);
+        summary.put("idle_time",3000L);
 
         //This sample contains no compilations or runes
         summary.put("total_compilations",1);
