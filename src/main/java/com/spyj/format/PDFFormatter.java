@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
+import com.spyj.logger.EventType;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -64,43 +66,114 @@ public class PDFFormatter implements LogFormatter{
                 writeLine(content,field[0]+": "+text,50,y,11);
                 y-=28;
             }
-             writeLine(content, "Page 1 of 2", 50, 40, 10);
+            //Gets the compilation counts
+            Number total=(Number) summary.get("total_compilations");
+            Number successful= (Number) summary.get("successful_compilations");
+
+            String successRate="Not available";
+
+            //Calculates the percentage when compilation exists
+            if(total!= null && successful!=null && total.longValue()>0){
+                    double percentage=successful.doubleValue()/total.doubleValue()*100;
+                    successRate=String.format(java.util.Locale.ROOT,"%.1f%%", percentage);
+            }
+            writeLine(content, "Compilation success rate: "+successRate,50,y,11);
+            writeLine(content, "Page 1 of 2", 50, 40, 10);
             }
     }
     //Creates the second page with recorded events
     private void addEventsPage(PDDocument document,List<TelemetryEvent>events) throws IOException{
-        PDPage page= new PDPage(PDRectangle.A4);
-        document.addPage(page);
         
-        try(PDPageContentStream content= new PDPageContentStream(document, page)){
-            writeLine(content,"Event Timeline",50,790,20);
+        PDPage page = new PDPage(PDRectangle.A4);
+        document.addPage(page);
 
-            float y =745;
+        // Counts each error message across all events.
+        Map<String, Integer> errorCounts = new LinkedHashMap<>();
 
-            
+        for (TelemetryEvent event : events) {
+            if (event.getEventType() == EventType.COMPILE_ERROR) {
+                Object message = event.getEventDetails().get("Error Message");
+
+                String error = message == null
+                        ? "Unknown error"
+                        : message.toString();
+
+                errorCounts.put(
+                        error,
+                        errorCounts.getOrDefault(error, 0) + 1);
+            }
+        }
+
+        try (PDPageContentStream content =
+                new PDPageContentStream(document, page)) {
+
+            writeLine(content, "Event Timeline", 50, 790, 20);
+
+            float y = 755;
+
             if (events.isEmpty()) {
                 writeLine(content, "No events recorded.", 50, y, 11);
             }
 
-            // Limits the preview so it fits on this page.
-            int displayed = Math.min(events.size(), 20);
+            // Leaves room for the error table below.
+            int displayed = Math.min(events.size(), 10);
 
             for (int i = 0; i < displayed; i++) {
                 TelemetryEvent event = events.get(i);
 
-                String text = event.getTimestamp().toString()+ " | " + event.getEventType().name();
+                String text = event.getTimestamp().toString() + " | " + event.getEventType().name();
 
-                writeLine(content, text, 50, y, 10);
-                y -= 28;
+                writeLine(content, text, 50, y, 9);
+                y -= 24;
             }
 
             if (events.size() > displayed) {
-                writeLine(content, "Showing the first 20 events. See JSON for all events.",50, y, 10);
+                writeLine(content, "Showing the first 10 events. See JSON for all events.",50, y, 10);
             }
+
+            writeLine(content, "Error Frequency", 50, 465, 16);
+            writeLine(content, "Count", 50, 435, 11);
+            writeLine(content, "Error message", 110, 435, 11);
+
+            // Draws a line below the table headings.
+            content.moveTo(50, 425);
+            content.lineTo(545, 425);
+            content.stroke();
+
+            y = 405;
+
+            if (errorCounts.isEmpty()) {
+                writeLine(
+                        content,
+                        "No compilation errors recorded.",
+                        50, y, 11);
+            }
+
+            int rows = 0;
+
+            // Shows up to 10 different error messages.
+            for (Map.Entry<String, Integer> entry : errorCounts.entrySet()) {
+                if (rows == 10) {
+                    break;
+                }
+
+                writeLine(content, entry.getValue().toString(),50, y, 10);
+                writeLine(content, entry.getKey(), 110, y, 10);
+
+                y -= 24;
+                rows++;
+            }
+
+            if (errorCounts.size() > rows) {
+                writeLine( content,"More error messages are available in the JSON events.",50, y, 10);
+            }
+
+            writeLine(content,"Long messages are shortened. See JSON for full details.",50, 100, 9);
 
             writeLine(content, "Page 2 of 2", 50, 40, 10);
         }
     }
+
 
     // Writes one line of text that fits within the page.
     private void writeLine(PDPageContentStream content, String text, float x, float y, int size) throws IOException {

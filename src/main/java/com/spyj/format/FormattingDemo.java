@@ -26,6 +26,26 @@ public class FormattingDemo{
 
         List<TelemetryEvent> events = new ArrayList<>();
         events.add(new TelemetryEvent(EventType.CLASS_CREATED,details));
+        //Ads two occrences of the same error
+        Map<String,Object> firstError= new LinkedHashMap<>();
+        firstError.put("Error Message", "Cannot find symbols");
+        firstError.put("Error Start Line",5);
+
+        events.add(new TelemetryEvent(EventType.COMPILE_ERROR, firstError));
+        events.add(new TelemetryEvent(EventType.COMPILE_ERROR, firstError));
+        
+        //Adds a different error
+         Map<String, Object> secondError= new LinkedHashMap<>();
+         secondError.put("Error Message","';' expected");
+         secondError.put("Error Start Line",8);
+
+         events.add(new TelemetryEvent(EventType.COMPILE_ERROR, secondError));
+        
+         //Records one failes compilation containing these errors
+         Map<String,Object> compilation =new LinkedHashMap<>();
+         compilation.put("Compile Status","Failed");
+
+         events.add(new TelemetryEvent(EventType.COMPILE_FAILED, compilation));
 
         Instant end= Instant.now();
 
@@ -41,9 +61,9 @@ public class FormattingDemo{
         summary.put("idle_time",null);
 
         //This sample contains no compilations or runes
-        summary.put("total_compilations",0);
+        summary.put("total_compilations",1);
         summary.put("successful_compilations",0);
-        summary.put("failed_compilations",0);
+        summary.put("failed_compilations",1);
         summary.put("total_runs",0);
 
         //Format the sample data
