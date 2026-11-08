@@ -189,6 +189,11 @@ public class PDFFormatter implements LogFormatter{
                 TelemetryEvent event = events.get(i);
 
                 String text = event.getTimestamp().toString() + " | " + event.getEventType().name();
+                //Adds the class name when available
+                Object className=event.getEventDetails().get("Class");
+                if(className !=null){
+                    text+=" | "+className.toString();
+                }
 
                 writeLine(content, text, 50, y, 9);
                 y -= 24;
