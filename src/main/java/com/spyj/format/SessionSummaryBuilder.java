@@ -53,9 +53,7 @@ public class SessionSummaryBuilder {
     }
 
     // Gets a group of statistics.
-    private Map<?, ?> getSection(
-            Map<String, Object> stats,
-            String name) {
+    private Map<?, ?> getSection(Map<String, Object> stats,String name) {
 
         Object section = stats.get(name);
 
