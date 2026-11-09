@@ -12,11 +12,13 @@ public class SpyJLoggerTest {
     private SpyJLogger logger;
     private EventSubscriber fakesubscriber;
 
+    @BeforeEach
     void setup() {
-        logger = new SpyJlogger();
+        logger = new SpyJLogger();
         fakesubscriber = mock(EventSubscriber.class);
     }
 
+    @Test
     void testAddSubscriberAndRecordEvent() {
         logger.addSubscribers(fakesubscriber);
         Map<String, Object> details = new HashMap<>();
@@ -27,10 +29,15 @@ public class SpyJLoggerTest {
         verify(fakesubscriber, times(1)).onEvent(any(TelemetryEvent.class));
     }
 
+    @Test
     void testSubscriberExceptionDoesNotAffectLogger(){
         EventSubscriber badSubscriber = mock(EventSubscriber.class);
-        doThrow(new RuntimeEception("Test Exception")).when(badSubscriber).onEvent(any());
+        doThrow(new RuntimeException("Test Exception")).when(badSubscriber).onEvent(any());
 
         logger.addSubscribers(badSubscriber);
+        logger.addSubscribers(fakesubscriber);
+
+        assertDoesNotThrow(() -> logger.recordEvent(EventType.PROJECT_OPENED, new HashMap<>()));
+        verify(fakesubscriber, times(1)).onEvent(any(TelemetryEvent.class));
     }
 }
