@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.spyj.logger.EventType;
 import com.spyj.logger.SpyJLogger;
@@ -67,7 +69,19 @@ public class EditorListener {
         if (Platform.isFxApplicationThread()) {
             r.run();
         } else {
-            Platform.runLater(r);
+            // Block until the FX flush completes so that terminate() reads a
+            // fully-populated EventStore. Without this the final typing burst
+            // could be missing from the report.
+            CountDownLatch latch = new CountDownLatch(1);
+            Platform.runLater(() -> {
+                r.run();
+                latch.countDown();
+            });
+            try {
+                latch.await(2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
