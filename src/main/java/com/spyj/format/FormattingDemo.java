@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import com.spyj.logger.EventStore;
+import com.spyj.logger.StatsTracker;
 
 
 import com.spyj.logger.EventType;
@@ -47,24 +49,24 @@ public class FormattingDemo{
 
          events.add(new TelemetryEvent(EventType.COMPILE_FAILED, compilation));
 
-        Instant end= Instant.now();
+        //Stores the sample events and calculates the stattistics
+        EventStore store = new EventStore();
+        StatsTracker tracker = new StatsTracker();
 
-        Map<String,Object> summary = new LinkedHashMap<>();
-        summary.put("session_id","demo-session");
-        summary.put("student_id","placeholder");
-        summary.put("start_time",start.toString());
-        summary.put("end_time",end.toString());
-        summary.put("session_duration",java.time.Duration.between(start,end).toMillis());
+        // Sends each event to both objects.
+        for (TelemetryEvent event : events) {
+             store.onEvent(event);
+             tracker.onEvent(event);
+}
 
-        //These values are unavailable until activity tracking is ready
-        summary.put("active_time",6000L);
-        summary.put("idle_time",3000L);
+        Instant end = Instant.now();
 
-        //This sample contains no compilations or runes
-        summary.put("total_compilations",1);
-        summary.put("successful_compilations",0);
-        summary.put("failed_compilations",1);
-        summary.put("total_runs",0);
+        // Uses the events saved by EventStore.
+        events = store.getEvents();
+        //Converts the tracked statistics into our report fields
+        SessionSummaryBuilder builder= new SessionSummaryBuilder();
+        Map<String,Object> summary=builder.build(tracker,"demo-session","placeholder",start,end);
+              
 
         //Format the sample data
         LogFormatter formatter = new JSONFormatter();
