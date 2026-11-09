@@ -15,6 +15,12 @@ public class TelemetryEvent {
         this.eventDetails = details;
     }
 
+    public TelemetryEvent (EventType type, Map<String, Object> details, Instant time) {
+        this.eventType = type;
+        this.eventDetails = details;
+        this.timestamp = time;
+    }
+
     public Instant getTimestamp() {
         return timestamp;
     }
