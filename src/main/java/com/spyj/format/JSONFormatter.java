@@ -11,11 +11,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.spyj.logger.TelemetryEvent;
 
-//Formats telemetry data as JSON using the startegy pattern
+/**
+ * Converts session information and recorded events into JSON.
+ * Includes each event's timestamp, type, and details.
+ * Uses the Strategy pattern through LogFormatter.
+ *
+ * @author Caitlyn Maharaj
+ */
 public class JSONFormatter implements LogFormatter {
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-
+/**
+ * Creates a readable JSON report as UTF-8 bytes.
+ *
+ * @param events the recorded telemetry events
+ * @param sessionSummary the session information and statistics
+ * @return the formatted JSON report as bytes
+ */
     @Override 
     public byte[] format(List<TelemetryEvent>events, Map<String,Object> sessionSummary) throws IOException{
         //Copies the session information
