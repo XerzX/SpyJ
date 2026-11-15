@@ -23,6 +23,12 @@ A data analytics plugin for collecting, formatting and analysing telemetry data 
   - [CompilationListener](#compilationlistener)
   - [ExecutionListener](#executionlistener)
   - [EditorListener](#editorlistener)
+- [Unit Testing & Quality Assurance](#unit-testing--quality-assurance)
+  - [Testing Architecture](#testing-architecture)
+  - [Test Suites](#test-suites)
+    - [Logger Tests](#logger-tests)
+    - [Listener Tests](#listener-tests)
+  - [Code Coverage (JaCoCo)](#code-coverage-jacoco) 
 
 ---
 
@@ -367,3 +373,56 @@ Monitors all JavaFX keyboard events across every BlueJ editor window. Because Bl
 #### `stop()`
 
 Called by `SpyJ.terminate()` before reading the event store. Runs on the JavaFX Application Thread (or schedules via `Platform.runLater` with a 2-second `CountDownLatch` if called off-thread) to ensure the final in-progress burst and any pending idle event are flushed before the report is generated.
+
+---
+
+## Unit Testing & Quality Assurance
+
+**Package:** `src/test/java/com/spyj/`
+
+To ensure the reliability and correctness of the telemetry data collection, SpyJ includes a comprehensive suite of automated tests. The testing infrastructure is built using **JUnit 5** for test execution and assertions, **Mockito** for mocking complex BlueJ API events, and **JaCoCo** for generating code coverage reports. 
+
+The test suites validate internal components independently of the BlueJ GUI interface, achieving the required code coverage target of at least 75%.
+
+---
+
+### Testing Architecture
+
+All tests are located in `src/test/java/com/spyj/` and mirror the package structure of the main source code. The Maven `pom.xml` is configured with the `maven-surefire-plugin` to automatically execute tests during the `mvn test` lifecycle phase.
+
+**Key Dependencies:**
+- `junit-jupiter` (v5.10.2)
+- `mockito-core` (v5.11.0)
+- `jacoco-maven-plugin` (v0.8.11)
+
+---
+
+### Test Suites
+
+The testing strategy is divided into two main categories: testing the core Observer/Data Aggregation logic (Logger Package) and testing the translation of BlueJ events into telemetry data (Listener Package).
+
+| Test Class | Component Tested | Key Validations |
+|------------|------------------|-----------------|
+| `SpyJLoggerTest` | `SpyJLogger` | Verifies the Observer pattern (subscribers are notified). Ensures that a `RuntimeException` thrown by one subscriber does not break the logging loop for others. |
+| `EventStoreTest` | `EventStore` | Verifies thread-safe event appending, retrieval of all events, filtering by `EventType`, and clearing the store. |
+| `StatsTrackerTest` | `StatsTracker` | Validates the mathematical aggregations. Tests compilation success rate percentages, total/longest/average idle time calculations, and error frequency tracking. |
+| `ClassListenerTest` | `ClassListener` | Mocks `ClassEvent` and `BClass` to verify that class creation, modification, and deletion events are correctly recorded with the proper `EventType`. |
+| `CompilationListenerTest` | `CompilationListener` | Mocks `CompileEvent` to verify that successful, failed, and error compilation events are logged with the correct duration and status details. |
+| `ExecutionListenerTest` | `ExecutionListener` | Mocks `InvocationFinishedEvent` to verify that normal exits are logged as `EXECUTION_SUCCEEDED` and abnormal exits as `EXECUTION_EXCEPTION`. |
+
+#### Logger Tests
+Because the `Logger` package handles pure data logic, these tests do not require complex mocking. They focus on state verification. For example, `StatsTrackerTest` feeds a sequence of `TelemetryEvent` objects into the tracker and asserts that the output of `getStats()` contains the exact expected calculations (e.g., feeding 2 successful and 1 failed compile must return a `Success Rate (%)` of `66.67`).
+
+#### Listener Tests
+Testing the listener classes is complex because they rely heavily on the BlueJ API (`bluej.extensions2`), which cannot be instantiated outside of a running BlueJ environment. To solve this, Mockito is used to create fake BlueJ events. 
+For example, in `ClassListenerTest`, a fake `ClassEvent` is created, and Mockito is used to define what `event.getBClass().getJavaFile()` returns. The test then triggers `listener.classStateChanged(fakeEvent)` and verifies (using `Mockito.verify`) that the `SpyJLogger` received the event with the correct `EventType.CLASS_CREATED` or `CLASS_MODIFIED`.
+
+---
+
+### Code Coverage (JaCoCo)
+
+To ensure the test suite is actually exercising the codebase rather than just passing trivially, SpyJ uses **JaCoCo** to generate coverage reports. 
+
+To run the full test suite and generate the coverage report, execute:
+```bash
+mvn clean test
