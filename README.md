@@ -23,6 +23,16 @@ A data analytics plugin for collecting, formatting and analysing telemetry data 
   - [CompilationListener](#compilationlistener)
   - [ExecutionListener](#executionlistener)
   - [EditorListener](#editorlistener)
+  - - [Formatting and Export Package](#formatting-and-export-package)
+  - [LogFormatter](#logformatter)
+  - [JSONFormatter](#jsonformatter)
+  - [PDFFormatter](#pdfformatter)
+  - [SessionSummaryBuilder](#sessionsummarybuilder)
+  - [Command](#command)
+  - [ExportCommand](#exportcommand)
+  - [CommandInvoker](#commandinvoker)
+  - [ReportExporter](#reportexporter)
+  - [FormattingDemo](#formattingdemo)
 - [Unit Testing & Quality Assurance](#unit-testing--quality-assurance)
   - [Testing Architecture](#testing-architecture)
   - [Test Suites](#test-suites)
@@ -396,6 +406,288 @@ All tests are located in `src/test/java/com/spyj/` and mirror the package struct
 - `jacoco-maven-plugin` (v0.8.11)
 
 ---
+---
+
+## Formatting and Export Package
+
+**Package:** `com.spyj.format`  
+**Contributor:** Caitlyn Maharaj — Data Formatting and Export
+
+This package converts recorded telemetry and session statistics into
+JSON and PDF reports. It separates report formatting, file saving,
+and command execution into different classes.
+
+The JSON report preserves all supplied events and their details.
+The PDF provides a two-page summary with statistics, charts,
+progression events, and compilation error information.
+
+---
+
+### LogFormatter
+
+**File:** `src/main/java/com/spyj/format/LogFormatter.java`
+
+The shared interface implemented by JSONFormatter and PDFFormatter.
+
+#### Key Method
+
+| Method | Description |
+|--------|-------------|
+| `format(List<TelemetryEvent>, Map<String, Object>)` | Receives recorded events and session information, and returns the formatted report as a byte array. Declares IOException. |
+
+This interface supports the Strategy pattern. Export code can work
+with either formatter through the same interface.
+
+---
+
+### JSONFormatter
+
+**File:** `src/main/java/com/spyj/format/JSONFormatter.java`
+
+Implements LogFormatter and uses Gson to produce readable JSON.
+
+#### Formatting Process
+
+1. Copies the supplied session summary into the report.
+2. Converts each event into a map containing its timestamp, type, and details.
+3. Adds the complete event list under the `events` field.
+4. Serializes the report and returns UTF-8 bytes.
+
+Timestamps are stored as text using Instant.toString().
+Gson pretty printing makes the output easier to read.
+Null values are included to represent unavailable information.
+
+This class formats the report but does not save it to a file.
+
+---
+
+### PDFFormatter
+
+**File:** `src/main/java/com/spyj/format/PDFFormatter.java`
+
+Implements LogFormatter and uses Apache PDFBox to create a two-page
+A4 report.
+
+#### Report Contents
+
+| Page | Contents |
+|------|----------|
+| Page 1 | Session information, recorded typing and idle durations, compilation counts, total runs, compilation success rate, and two bar charts. |
+| Page 2 | Class creation and method definition timeline, compilation error frequency table, and intervals between compilation completion events. |
+
+#### Important Methods
+
+| Method | Description |
+|--------|-------------|
+| `format(...)` | Creates the PDF, adds both pages, and returns the document as bytes. |
+| `addSummaryPage(...)` | Displays session statistics and the two charts. |
+| `drawCompilationChart(...)` | Compares successful and failed compilation counts. |
+| `drawActivityChart(...)` | Displays full-session activity values when supplied; otherwise uses recorded editor typing and idle durations. |
+| `addEventsPage(...)` | Displays progression events and counts compilation error messages. |
+| `drawCompilationIntervals(...)` | Calculates gaps between sorted successful or failed compilation event timestamps. |
+| `getNumber(...)` | Returns a numeric summary value, or null when the value is not numeric. |
+| `writeLine(...)` | Writes text and shortens lines that exceed the available width. |
+
+#### Calculations and Display Limits
+
+- Compilation success rate is successful compilations divided by
+  total compilations, multiplied by 100.
+- The progression timeline includes CLASS_CREATED and METHOD_DEFINED
+  events, sorted by timestamp.
+- Up to nine progression events are displayed.
+- Error frequencies count COMPILE_ERROR events grouped by their
+  complete error message.
+- Up to eight distinct error messages are displayed in encounter order.
+- The first three compilation intervals are displayed.
+- The average interval uses all consecutive compilation completion
+  timestamps.
+- Compilation intervals represent time between completion events,
+  not the duration of an individual compilation.
+- Long text is shortened, and characters outside printable ASCII
+  are replaced with question marks.
+
+The JSON report retains the supplied events and full details when
+the PDF cannot display everything.
+
+---
+
+### SessionSummaryBuilder
+
+**File:** `src/main/java/com/spyj/format/SessionSummaryBuilder.java`
+
+Converts StatsTracker statistics into the field names used by
+the JSON and PDF reports.
+
+#### Key Methods
+
+| Method | Description |
+|--------|-------------|
+| `build(tracker, sessionId, studentId, start, end)` | Creates the session summary using identifiers, session timestamps, and tracked statistics. |
+| `getSection(stats, name)` | Retrieves a required statistics map and rejects missing or incorrectly structured sections. |
+
+#### Summary Fields
+
+| Fields | Source or meaning |
+|--------|-------------------|
+| `session_id`, `student_id` | Identifiers supplied by the caller. |
+| `start_time`, `end_time` | Supplied session timestamps converted to text. |
+| `session_duration` | Milliseconds between the supplied start and end times. |
+| `active_time`, `idle_time` | Null because full-session activity measurements are unavailable. |
+| `active_typing_time` | StatsTracker's Active Typing Time (ms). |
+| `recorded_editor_idle_time` | StatsTracker's Total Idle Time (ms). |
+| `total_compilations` | Total Compiles from the Compilation statistics. |
+| `successful_compilations`, `failed_compilations` | Succeeded and Failed compilation counts. |
+| `total_runs` | Total Runs from the Execution statistics. |
+
+The builder rejects an end time earlier than the start time.
+
+Recorded typing and editor idle durations do not necessarily cover
+the entire session.
+
+---
+
+### Command
+
+**File:** `src/main/java/com/spyj/format/Command.java`
+
+Defines the interface for an executable operation.
+
+| Method | Description |
+|--------|-------------|
+| `execute()` | Performs the operation and declares IOException. |
+
+This interface forms part of the Command pattern.
+
+---
+
+### ExportCommand
+
+**File:** `src/main/java/com/spyj/format/ExportCommand.java`
+
+Implements Command and stores the information needed to save
+one report.
+
+#### Constructor Inputs
+
+- A LogFormatter implementation.
+- The recorded events.
+- The session summary.
+- The destination Path.
+
+The constructor copies the event list and summary map.
+These are shallow copies: nested objects are not independently copied.
+
+#### Execution
+
+`execute()` formats the data, creates missing parent directories,
+and writes the resulting bytes to the destination file.
+An existing file at the same path is overwritten.
+
+Formatting and file-writing errors are passed to the caller.
+
+---
+
+### CommandInvoker
+
+**File:** `src/main/java/com/spyj/format/CommandInvoker.java`
+
+Runs commands through a single-thread ExecutorService.
+Commands execute one at a time in submission order.
+
+| Method | Description |
+|--------|-------------|
+| `submit(Command)` | Queues a command and returns a Future<Void> for checking completion or retrieving an execution failure. |
+| `close()` | Stops accepting new work and waits for submitted tasks to finish. |
+
+The class implements AutoCloseable so it can be used in a
+try-with-resources block.
+
+Waiting through Future.get() or close() blocks the calling thread.
+FormattingDemo uses these operations to wait for its reports.
+
+---
+
+### ReportExporter
+
+**File:** `src/main/java/com/spyj/format/ReportExporter.java`
+
+Coordinates the export of both JSON and PDF reports.
+
+#### Key Method
+
+`export(store, tracker, sessionId, studentId, start, end)`
+
+This method:
+
+1. Retrieves an event snapshot from EventStore.
+2. Builds the session summary using SessionSummaryBuilder.
+3. Creates JSON and PDF bytes through the LogFormatter interface.
+4. Creates the output directory if needed.
+5. Writes both reports and prints their absolute paths.
+
+#### Output Files
+
+- `target/reports/<sessionId>.json`
+- `target/reports/<sessionId>.pdf`
+
+These paths are relative to the application's working directory.
+
+SpyJ.terminate() calls this exporter at shutdown when recorded events
+are available. In this implementation, ReportExporter performs its
+work synchronously; it does not use CommandInvoker.
+
+---
+
+### FormattingDemo
+
+**File:** `src/main/java/com/spyj/format/FormattingDemo.java`
+
+Demonstrates formatting and export using a controlled 60-second
+sample session.
+
+The sample includes:
+
+- One class creation and one method definition.
+- 30,000 milliseconds of typing.
+- 10,000 milliseconds of editor idle time.
+- Three compilation errors, including a repeated message.
+- Two failed compilations and one successful compilation.
+
+The events are passed directly to EventStore and StatsTracker
+to preserve their supplied timestamps.
+
+The demo builds a session summary, creates JSON and PDF ExportCommands,
+submits them to CommandInvoker, and waits for completion.
+
+#### Running the Demo
+
+1. Compile the project using `mvn compile`.
+2. Open FormattingDemo.java in VS Code.
+3. Run its main method.
+
+#### Output Files
+
+- `target/sample-report.json`
+- `target/sample-report.pdf`
+
+The demo exercises report generation with sample data.
+It is not an automated assertion-based test or a complete BlueJ
+integration test.
+
+---
+
+### Design Patterns Used in This Package
+
+| Pattern | Classes | Purpose |
+|---------|---------|---------|
+| Strategy | LogFormatter, JSONFormatter, PDFFormatter | Allows different report formats to share the same interface. |
+| Command | Command, ExportCommand, CommandInvoker | Separates an export request from its execution. |
+
+### External Libraries
+
+- Gson: JSON serialization.
+- Apache PDFBox: PDF generation.
+- Maven: dependency and build management.
 
 ### Test Suites
 
