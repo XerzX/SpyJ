@@ -390,7 +390,8 @@ Called by `SpyJ.terminate()` before reading the event store. Runs on the JavaFX 
 ## Formatting and Export Package
 
 **Package:** `com.spyj.format`  
-**Contributor:** Caitlyn Maharaj — Data Formatting and Export
+**Contributor:** Caitlyn Maharaj - Data Formatting and Export
+**Student ID:**816039787
 
 This package converts recorded telemetry and session statistics into
 JSON and PDF reports. It separates report formatting, file saving,
