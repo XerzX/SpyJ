@@ -6,10 +6,27 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.spyj.logger.StatsTracker;
-
-// Prepares session information for the reports.
+/**
+ * Prepares session information and tracked statistics for reports.
+ * Converts StatsTracker values into the field names used by the formatters.
+ *
+ * @author Caitlyn Maharaj
+ */
 public class SessionSummaryBuilder {
-    //Converts tracked statistics into the field names used by our reports
+    /**
+ * Builds a summary using session details and tracked statistics.
+ * Calculates session duration in milliseconds.
+ * Leaves full-session active and idle times null because they are unavailable.
+ *
+ * @param tracker the source of the tracked statistics
+ * @param sessionId the session identifier
+ * @param studentId the student identifier or placeholder
+ * @param start the session start time
+ * @param end the session end time
+ * @return a map containing the report's session summary
+ * @throws IllegalArgumentException if end precedes start or a required
+ *         statistics section is missing or is not a map
+ */
     public Map<String, Object> build(StatsTracker tracker,String sessionId, String studentId, Instant start, Instant end) {
 
         if (end.isBefore(start)) {
