@@ -18,12 +18,12 @@ A data analytics plugin for collecting, formatting and analysing telemetry data 
   - [EventStore](#eventstore)
   - [StatsTracker](#statstracker)
 - [Listener Package](#listener-package)
-  - [ProjectListener](#projectlistener)
+  -- [ProjectListener](#projectlistener)
   - [ClassListener](#classlistener)
   - [CompilationListener](#compilationlistener)
   - [ExecutionListener](#executionlistener)
   - [EditorListener](#editorlistener)
-  - - [Formatting and Export Package](#formatting-and-export-package)
+- [Formatting and Export Package](#formatting-and-export-package)
   - [LogFormatter](#logformatter)
   - [JSONFormatter](#jsonformatter)
   - [PDFFormatter](#pdfformatter)
@@ -385,27 +385,6 @@ Monitors all JavaFX keyboard events across every BlueJ editor window. Because Bl
 Called by `SpyJ.terminate()` before reading the event store. Runs on the JavaFX Application Thread (or schedules via `Platform.runLater` with a 2-second `CountDownLatch` if called off-thread) to ensure the final in-progress burst and any pending idle event are flushed before the report is generated.
 
 ---
-
-## Unit Testing & Quality Assurance
-
-**Package:** `src/test/java/com/spyj/`
-
-To ensure the reliability and correctness of the telemetry data collection, SpyJ includes a comprehensive suite of automated tests. The testing infrastructure is built using **JUnit 5** for test execution and assertions, **Mockito** for mocking complex BlueJ API events, and **JaCoCo** for generating code coverage reports. 
-
-The test suites validate internal components independently of the BlueJ GUI interface, achieving the required code coverage target of at least 75%.
-
----
-
-### Testing Architecture
-
-All tests are located in `src/test/java/com/spyj/` and mirror the package structure of the main source code. The Maven `pom.xml` is configured with the `maven-surefire-plugin` to automatically execute tests during the `mvn test` lifecycle phase.
-
-**Key Dependencies:**
-- `junit-jupiter` (v5.10.2)
-- `mockito-core` (v5.11.0)
-- `jacoco-maven-plugin` (v0.8.11)
-
----
 ---
 
 ## Formatting and Export Package
@@ -688,6 +667,28 @@ integration test.
 - Gson: JSON serialization.
 - Apache PDFBox: PDF generation.
 - Maven: dependency and build management.
+
+## Unit Testing & Quality Assurance
+
+**Package:** `src/test/java/com/spyj/`
+
+To ensure the reliability and correctness of the telemetry data collection, SpyJ includes a comprehensive suite of automated tests. The testing infrastructure is built using **JUnit 5** for test execution and assertions, **Mockito** for mocking complex BlueJ API events, and **JaCoCo** for generating code coverage reports. 
+
+The test suites validate internal components independently of the BlueJ GUI interface, achieving the required code coverage target of at least 75%.
+
+---
+
+### Testing Architecture
+
+All tests are located in `src/test/java/com/spyj/` and mirror the package structure of the main source code. The Maven `pom.xml` is configured with the `maven-surefire-plugin` to automatically execute tests during the `mvn test` lifecycle phase.
+
+**Key Dependencies:**
+- `junit-jupiter` (v5.10.2)
+- `mockito-core` (v5.11.0)
+- `jacoco-maven-plugin` (v0.8.11)
+
+---
+---
 
 ### Test Suites
 
