@@ -10,7 +10,11 @@ import java.util.Map;
 import com.spyj.logger.EventStore;
 import com.spyj.logger.StatsTracker;
 import com.spyj.logger.TelemetryEvent;
-
+/**
+ * Collects session data and saves JSON and PDF reports.
+ *
+ * @author Caitlyn Maharaj
+ */
 // Exports recorded telemetry data as JSON and PDF reports.
 public class ReportExporter {
 
