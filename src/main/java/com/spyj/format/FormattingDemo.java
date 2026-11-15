@@ -15,7 +15,11 @@ import java.util.concurrent.Future;
 
 import com.spyj.logger.EventType;
 import com.spyj.logger.TelemetryEvent;
-
+/**
+ * Demonstrates JSON and PDF exports using sample telemetry events.
+ *
+ * @author Caitlyn Maharaj
+ */
 //Test JSON formatting with sample  data
 public class FormattingDemo{
     public static void main(String[] args) throws IOException,InterruptedException,ExecutionException{
