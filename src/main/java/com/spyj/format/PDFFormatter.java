@@ -19,7 +19,12 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-
+/**
+ * Creates a PDF report with session statistics, charts,
+ * progression events, and compilation error information.
+ *
+ * @author Caitlyn Maharaj
+ */
 // Formats telemetry data as a PDF report using the Strategy pattern.
 public class PDFFormatter implements LogFormatter {
 
