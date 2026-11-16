@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.spyj.logger.TelemetryEvent;
+
 /**
  * Formats telemetry data and saves it to a report file.
  * Acts as a concrete command in the Command pattern.
@@ -18,10 +19,18 @@ import com.spyj.logger.TelemetryEvent;
  */
 public class ExportCommand implements Command {
 
+    /** Strategy used to generate the report content. */
     private final LogFormatter formatter;
+
+    /** Shallow copy of the telemetry event list to export. */
     private final List<TelemetryEvent> events;
-    private final Map<String,Object>summary;
+
+    /** Shallow copy of the session information and statistics. */
+    private final Map<String, Object> summary;
+
+    /** Destination path for the generated report file. */
     private final Path output;
+
     /**
      * Creates a command containing the information needed for one export.
      * Copies the event list and summary map, but not their nested objects.
@@ -32,26 +41,38 @@ public class ExportCommand implements Command {
      * @param output the destination file path
      * @throws NullPointerException if any argument is null
      */
-    public ExportCommand(LogFormatter formatter,List<TelemetryEvent>events, Map<String,Object>summary,Path output){
-        this.formatter=Objects.requireNonNull(formatter);
-        this.output=Objects.requireNonNull(output);
-        this.events=new ArrayList<>(events);
-        this.summary=new LinkedHashMap<>(summary); 
+    public ExportCommand(
+            LogFormatter formatter,
+            List<TelemetryEvent> events,
+            Map<String, Object> summary,
+            Path output) {
+
+        this.formatter = Objects.requireNonNull(formatter);
+        this.output = Objects.requireNonNull(output);
+        this.events = new ArrayList<>(events);
+        this.summary = new LinkedHashMap<>(summary);
     }
+
+    /**
+     * Generates the report and writes it to the destination file.
+     * Creates missing parent directories and replaces existing file content.
+     *
+     * @throws IOException if report generation, directory creation,
+     *                     or file writing fails
+     */
     @Override
-    public void execute() throws IOException{
-        //Converts the data into JSON or PDF bytes
-        byte[]content=formatter.format(events,summary);
+    public void execute() throws IOException {
+        // Converts the data into report bytes.
+        byte[] content = formatter.format(events, summary);
 
-        //Creates a destination folder
-        Path parent= output.toAbsolutePath().getParent();
+        // Creates the destination folder if necessary.
+        Path parent = output.toAbsolutePath().getParent();
 
-        if( parent!=null){
+        if (parent != null) {
             Files.createDirectories(parent);
         }
 
-        //Saves the report, replacing an existing file path
-        Files.write(output,content);
+        // Saves the report, replacing existing content.
+        Files.write(output, content);
     }
 }
-
