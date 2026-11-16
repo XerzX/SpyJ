@@ -22,6 +22,17 @@ import com.spyj.logger.TelemetryEvent;
  */
 //Test JSON formatting with sample  data
 public class FormattingDemo{
+        /**
+     * Simulates a 60-second session and exports sample JSON and PDF reports.
+     * Sends controlled events to the event store and statistics tracker,
+     * then submits export commands and waits for their completion.
+     * Saves the reports as target/sample-report.json and
+     * target/sample-report.pdf relative to the working directory.
+     *
+     * @param args command-line arguments; not used
+     * @throws InterruptedException if interrupted while waiting for an export
+     * @throws ExecutionException if an export command fails
+     */
     public static void main(String[] args) throws IOException,InterruptedException,ExecutionException{
         
         // Start of the simulated 60-second session.
