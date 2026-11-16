@@ -177,7 +177,7 @@ open target/reports/apidocs/index.html
 # Windows (Git Bash / PowerShell)
 start target/reports/apidocs/index.html
 ```
-
+> **Note:** The JavaDocs for this project is also hosted on the follow github page: https://xerzx.github.io/SpyJ/
 ---
 
 ## Architecture
