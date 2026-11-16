@@ -46,13 +46,6 @@ A data analytics plugin for collecting, formatting and analysing telemetry data 
 
 SpyJ is a [BlueJ](https://www.bluej.org/) Extension (Extensions API v2) that observes a student's coding session and collects structured telemetry data. When BlueJ shuts down, SpyJ exports a session report (JSON + PDF) that should describe how the student worked: what projects and classes were touched, how much they typed, how often they compiled, and what errors they encountered.
 
-The plugin follows a **publish-subscribe** design:
-
-1. **Listeners** (one per BlueJ event type) translate raw BlueJ callbacks into typed `TelemetryEvent` objects and hand them to `SpyJLogger`.
-2. **SpyJLogger** pushes each event out to all registered **subscribers**.
-3. Two subscribers run in parallel — `EventStore` (append-only event log) and `StatsTracker` (live aggregated statistics).
-4. On shutdown, `ReportExporter` reads both subscribers and writes the final report.
-
 ---
 
 ## Architecture
