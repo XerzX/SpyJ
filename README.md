@@ -164,6 +164,7 @@ The docs are generated at:
 ```
 target/reports/apidocs/index.html
 ```
+> **Note:** The JavaDocs for this project is also hosted on the following github page: https://xerzx.github.io/SpyJ/
 
 To open them directly from the terminal:
 
@@ -177,7 +178,6 @@ open target/reports/apidocs/index.html
 # Windows (Git Bash / PowerShell)
 start target/reports/apidocs/index.html
 ```
-> **Note:** The JavaDocs for this project is also hosted on the following github page: https://xerzx.github.io/SpyJ/
 ---
 
 ## Architecture
