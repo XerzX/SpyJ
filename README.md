@@ -109,7 +109,9 @@ bluej.addInvocationFinishedListener(executionListener)
 
 ## Logger Package
 
-**Package:** `com.spyj.logger`
+**Package:** `com.spyj.logger`  
+**Contributor:** Mykel Dedier - Event Capture and Data Logging
+**Student ID:**816042057
 
 The logger package is the core of SpyJ's data model. It receives captured BlueJ event data and processes them into TelemetryEvent objects, which encapsulates the captured event data with a timestamp of when said TelemetryEvent objects were created. SpyJLogger is the core of the logger package, and serves as the Subject to which EventSubscribers are attatched to. Created TelemetryEvent objects within SpyJLogger are pushed to EventSubscribers for persistence throughout the Editor's currently running process and for the quantifying of event data into useful statistics.
 
@@ -272,7 +274,9 @@ An `EventSubscriber` that maintains a continuously-updated set of aggregated sta
 
 ## Listener Package
 
-**Package:** `com.spyj.listener`
+**Package:** `com.spyj.listener`  
+**Contributor:** Mykel Dedier - Event Capture and Data Logging
+**Student ID:**816042057
 
 Each listener connects a specific BlueJ (or JavaFX for EditorListener) API to the `SpyJLogger`. Listeners translate BlueJ events into a curated set of `Map<String, Object>` detail stores and call `sjLogger.recordEvent(...)`. The Listener classes themselves form a psudeo Observer Pattern with BlueJ's API.
 
