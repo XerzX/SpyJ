@@ -49,6 +49,12 @@ Designed and implemented the automated **test suite** using JUnit 5 and Mockito.
 ## Table of Contents
 
 - [Overview](#overview)
+- [How to Run](#how-to-run)
+  - [Prerequisites](#prerequisites)
+  - [Build the Extension JAR](#build-the-extension-jar)
+  - [Install in BlueJ](#install-in-bluej)
+  - [Run Tests & Coverage](#run-tests--coverage)
+  - [Generate Javadocs](#generate-javadocs)
 - [Architecture](#architecture)
 - [Entry Point — `SpyJ`](#entry-point--spyj)
 - [Logger Package](#logger-package)
@@ -60,7 +66,7 @@ Designed and implemented the automated **test suite** using JUnit 5 and Mockito.
   - [EventStore](#eventstore)
   - [StatsTracker](#statstracker)
 - [Listener Package](#listener-package)
-  -- [ProjectListener](#projectlistener)
+  - [ProjectListener](#projectlistener)
   - [ClassListener](#classlistener)
   - [CompilationListener](#compilationlistener)
   - [ExecutionListener](#executionlistener)
@@ -80,13 +86,97 @@ Designed and implemented the automated **test suite** using JUnit 5 and Mockito.
   - [Test Suites](#test-suites)
     - [Logger Tests](#logger-tests)
     - [Listener Tests](#listener-tests)
-  - [Code Coverage (JaCoCo)](#code-coverage-jacoco) 
+  - [Code Coverage (JaCoCo)](#code-coverage-jacoco)
 
 ---
 
 ## Overview
 
 SpyJ is a [BlueJ](https://www.bluej.org/) Extension (Extensions API v2) that observes a student's coding session and collects structured telemetry data. When BlueJ shuts down, SpyJ exports a session report (JSON + PDF) that should describe how the student worked: what projects and classes were touched, how much they typed, how often they compiled, and what errors they encountered.
+
+---
+
+## How to Run
+
+### Prerequisites
+
+| Requirement | Version |
+|-------------|---------|
+| [Java JDK](https://adoptium.net/) | 21 or later |
+| [Apache Maven](https://maven.apache.org/) | 3.8 or later |
+| [BlueJ](https://www.bluej.org/) | 5.x or later (Extensions API v2) |
+
+Verify your environment before building:
+```bash
+java -version
+mvn -version
+```
+
+---
+
+### Build the Extension JAR
+
+From the project root (the directory containing `pom.xml`), run:
+
+```bash
+mvn clean package
+```
+
+This compiles all sources, runs the test suite, and produces the shaded JAR at:
+
+```
+target/spyj-1.0-SNAPSHOT.jar
+```
+
+> **Note:** The shade plugin bundles all runtime dependencies (Gson, PDFBox) into this single JAR. The BlueJ API and JavaFX dependencies are marked `provided` and are supplied by BlueJ at runtime.
+
+---
+
+### Install in BlueJ
+
+1. Locate your BlueJ extensions directory. The default paths are:
+   - **Windows:** `%APPDATA%\BlueJ\extensions2\`
+   - **macOS:** `~/Library/Application Support/BlueJ/extensions2/`
+   - **Linux:** `~/.bluej/extensions2/`
+2. Copy the built JAR into that directory:
+   ```bash
+   cp target/spyj-1.0-SNAPSHOT.jar ~/.bluej/extensions2/spyj.jar
+   ```
+3. Start (or restart) BlueJ. SpyJ will load automatically — no further configuration is needed.
+4. Work normally in BlueJ. When BlueJ closes, the JSON and PDF reports are written to:
+   ```
+   target/reports/<session-id>.json
+   target/reports/<session-id>.pdf
+   ```
+   The exact paths are also printed to BlueJ's log output on shutdown. The location of the target folder differs per system
+
+---
+
+### Generate Javadocs
+
+To generate the API documentation for all packages:
+
+```bash
+mvn javadoc:javadoc
+```
+
+The docs are generated at:
+```
+target/reports/apidocs/index.html
+```
+
+To open them directly from the terminal:
+
+```bash
+# Linux
+xdg-open target/reports/apidocs/index.html
+
+# macOS
+open target/reports/apidocs/index.html
+
+# Windows (Git Bash / PowerShell)
+start target/reports/apidocs/index.html
+```
 
 ---
 
