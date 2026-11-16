@@ -12,10 +12,21 @@ import java.util.concurrent.Future;
  */
 public class CommandInvoker implements AutoCloseable {
 
-    // Commands run one at a time in the order submitted.
+    /**
+ * Executes submitted commands sequentially on a single background thread.
+ */
     private final ExecutorService worker =Executors.newSingleThreadExecutor();
 
-    // Queues a command and returns a way to check its result.
+    /**
+ * Submits a command for execution on the background thread.
+ * Execution failures are reported through the returned future.
+ *
+ * @param command the command to execute
+ * @return a future that completes with null when the command succeeds
+ * @throws NullPointerException if command is null
+ * @throws java.util.concurrent.RejectedExecutionException
+ *         if the executor cannot accept the command, such as after closing
+ */
     public Future<Void> submit(Command command) {Objects.requireNonNull(command);
 
         return worker.submit(() -> {
