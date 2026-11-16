@@ -4,6 +4,48 @@ A data analytics plugin for collecting, formatting and analysing telemetry data 
 
 ---
 
+## Introduction
+
+### Project Purpose
+
+SpyJ is a BlueJ IDE extension built to passively collect and report on student coding behaviour. Without interrupting the student's workflow, SpyJ silently observes each session — capturing project and class lifecycle events, editor typing patterns, compilation attempts, and program executions — then produces a structured JSON export and a human-readable PDF report the moment BlueJ closes. The goal is to give insight into *how* students write code, not just *what* they produce: how often they compile, how they recover from errors, how long they spend typing versus idling.
+
+---
+
+### Project Scope
+
+SpyJ captures four categories of BlueJ events: **project/class lifecycle** actions (create, open, modify, delete, close), **editor interactions** (typing bursts, idle time, keystroke cadence), **compilation events** (success/failure, error codes and line numbers, inter-compile intervals), and **program executions** (normal exits and runtime exceptions). Student privacy is protected by deliberately excluding source code content, raw keystrokes, and any activity outside BlueJ.
+
+At session end, SpyJ exports a **timestamped JSON file** (with full event details and session-level aggregates) and a **two-page PDF report** (session summary stats, compilation success rate, activity charts, class/method timeline, and error frequency table). All event data is held in-memory during the session; nothing is written to disk until BlueJ shuts down.
+
+---
+
+### Team
+
+| Name | Student ID | Role |
+|------|------------|------|
+| Mykel Dedier | 816042057 | Event Capture & Data Logging |
+| Caitlyn Maharaj | 816039787 | Data Formatting & Export |
+| Aidan Ramnarine | | Unit Testing & Quality Assurance |
+
+---
+
+### Roles & Contributions
+
+#### Mykel Dedier — Event Capture & Data Logging
+
+Designed and implemented the core telemetry data capture system. This includes the **Logger** and **Listener** packages using the Observer pattern. Also implemented the main `SpyJ` extension entry point and plugin lifecycle management.
+
+#### Caitlyn Maharaj — Data Formatting & Export
+
+Implemented the **Format** package. This covers the `LogFormatter` strategy interface, `JSONFormatter` (Gson-based event serialisation), `PDFFormatter` (Apache PDFBox two-page report with charts and tables), `SessionSummaryBuilder` (stats-to-report-fields mapping), and the Command-pattern export structure (`Command`, `ExportCommand`, `CommandInvoker`, `ReportExporter`).
+
+#### Aidan Ramnarine — Unit Testing & Quality Assurance
+
+Designed and implemented the automated **test suite** using JUnit 5 and Mockito. Configured JaCoCo for code coverage reporting and established the project's quality assurance target of ≥ 75% coverage. Test classes include `SpyJLoggerTest`, `EventStoreTest`, `StatsTrackerTest`, `ClassListenerTest`, `CompilationListenerTest`, and `ExecutionListenerTest`.
+
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -671,6 +713,10 @@ integration test.
 - Maven: dependency and build management.
 
 ## Unit Testing & Quality Assurance
+
+**Contributor:** Aidan Ramnarine - Unit Testing & Quality Assurance
+
+**Student ID:** 
 
 **Package:** `src/test/java/com/spyj/`
 
