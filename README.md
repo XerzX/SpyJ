@@ -24,7 +24,7 @@ At session end, SpyJ exports a **timestamped JSON file** (with full event detail
 
 | Name | Student ID | Role |
 |------|------------|------|
-| Mykel Dedier | 816042057 | Event Capture & Data Logging |
+| Mykel Dedier | 816042057 | Extension Entry Point, Event Capture & Data Logging |
 | Caitlyn Maharaj | 816039787 | Data Formatting & Export |
 | Aidan Ramnarine | | Unit Testing & Quality Assurance |
 
