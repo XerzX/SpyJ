@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+
 /**
  * Creates a PDF report with session statistics, charts,
  * progression events, and compilation error information.
@@ -28,6 +29,14 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 // Formats telemetry data as a PDF report using the Strategy pattern.
 public class PDFFormatter implements LogFormatter {
 
+    /**
+     * Creates a two-page PDF containing session statistics and event summaries.
+     *
+     * @param events the recorded telemetry events
+     * @param sessionSummary the session information and statistics
+     * @return the generated PDF as a byte array
+     * @throws IOException if the PDF cannot be generated or saved
+     */
     @Override
     public byte[] format(List<TelemetryEvent> events, Map<String, Object> sessionSummary) throws IOException {
         try (PDDocument document = new PDDocument();
@@ -41,7 +50,13 @@ public class PDFFormatter implements LogFormatter {
         }
     }
 
-    // Creates the first page containing session statistics and charts.
+    /**
+     * Adds the first page with session statistics, success rate and charts.
+     *
+     * @param document the PDF document receiving the page
+     * @param summary the session information and statistics
+     * @throws IOException if the page content cannot be written
+     */
     private void addSummaryPage(PDDocument document, Map<String, Object> summary) throws IOException {
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
@@ -92,7 +107,14 @@ public class PDFFormatter implements LogFormatter {
         }
     }
 
-    // Draws successful and failed compilation counts.
+    /**
+     * Draws successful and failed compilation counts using a shared scale.
+     * Displays a message when counts are unavailable, negative or both zero.
+     *
+     * @param content the stream used to draw on the page
+     * @param summary the summary containing compilation counts
+     * @throws IOException if the chart or its labels cannot be written
+     */
     private void drawCompilationChart(PDPageContentStream content, Map<String, Object> summary) throws IOException {
         writeLine(content, "Compilation Results", 50, 400, 16);
 
@@ -148,7 +170,15 @@ public class PDFFormatter implements LogFormatter {
         writeLine(content, "Bar length represents compilation count.", 50, 290, 9);
     }
 
-    // Draws active coding and idle time when measurements are available.
+    /**
+     * Draws activity durations in milliseconds using a shared scale.
+     * Uses recorded editor measurements if full-session values are unavailable.
+     * Displays a message for missing, negative or all-zero durations.
+     *
+     * @param content the stream used to draw on the page
+     * @param summary the summary containing activity measurements
+     * @throws IOException if the chart or its labels cannot be written
+     */
     private void drawActivityChart(PDPageContentStream content, Map<String, Object> summary) throws IOException {
         Number active = getNumber(summary, "active_time");
         Number idle = getNumber(summary, "idle_time");
@@ -219,7 +249,15 @@ public class PDFFormatter implements LogFormatter {
         }
     }
 
-    // Creates the second page containing progression events and compilation errors.
+    /**
+     * Adds the second page with progression events, error frequencies
+     * and compilation intervals.
+     * Displays up to nine progression events and eight distinct error messages.
+     *
+     * @param document the PDF document receiving the page
+     * @param events the recorded telemetry events
+     * @throws IOException if the page content cannot be written
+     */
     private void addEventsPage(PDDocument document, List<TelemetryEvent> events) throws IOException {
         PDPage page = new PDPage(PDRectangle.A4);
         document.addPage(page);
@@ -320,7 +358,16 @@ public class PDFFormatter implements LogFormatter {
         }
     }
 
-    // Calculates intervals between compilations.
+    /**
+     * Calculates gaps between consecutive compilation completion timestamps.
+     * Sorts successful and failed compilation events by time, displays the
+     * first three gaps and calculates the average across all gaps.
+     * Requires at least two compilation events.
+     *
+     * @param content the stream used to write on the page
+     * @param events the events containing compilation completion timestamps
+     * @throws IOException if the interval information cannot be written
+     */
     private void drawCompilationIntervals(PDPageContentStream content, List<TelemetryEvent> events) throws IOException {
         writeLine(content, "Compilation Intervals", 50, 305, 16);
 
@@ -364,13 +411,30 @@ public class PDFFormatter implements LogFormatter {
         }
     }
 
-    // Retrieves numeric values from the summary.
+    /**
+     * Retrieves a numeric value from the session summary.
+     *
+     * @param summary the map containing session statistics
+     * @param key the key identifying the requested value
+     * @return the numeric value, or null if it is missing or not a Number
+     */
     private Number getNumber(Map<String, Object> summary, String key) {
         Object value = summary.get(key);
         return value instanceof Number ? (Number) value : null;
     }
 
-    // Writes text while preventing it from extending beyond the page.
+    /**
+     * Writes a line of text using Helvetica.
+     * Replaces characters outside printable ASCII with question marks
+     * and shortens long text with an ellipsis to fit the available width.
+     *
+     * @param content the stream used to write on the page
+     * @param text the text to display
+     * @param x the horizontal starting position in PDF points
+     * @param y the vertical baseline position in PDF points
+     * @param size the font size in points
+     * @throws IOException if the text cannot be measured or written
+     */
     private void writeLine(PDPageContentStream content, String text, float x, float y, int size) throws IOException {
         PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
         String safeText = text.replaceAll("[^\\x20-\\x7E]", "?");
