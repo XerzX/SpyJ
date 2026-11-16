@@ -17,7 +17,25 @@ import com.spyj.logger.TelemetryEvent;
  */
 // Exports recorded telemetry data as JSON and PDF reports.
 public class ReportExporter {
-
+    /**
+     * Generates and saves JSON and PDF reports for a session.
+     * Writes files to target/reports relative to the working directory,
+     * using the session identifier as each filename.
+     * Creates missing directories and replaces existing file content.
+     * Performs the export synchronously.
+     *
+     * @param store the source of the recorded telemetry events
+     * @param tracker the source of the tracked statistics
+     * @param sessionId the session identifier used in the report and filenames
+     * @param studentId the student identifier or placeholder
+     * @param start the session start time
+     * @param end the session end time
+     * @throws IOException if report generation, directory creation,
+     *                     or file writing fails
+     * @throws IllegalArgumentException if end precedes start or a required
+     *                                  statistics section is missing or invalid
+     * @throws NullPointerException if store, tracker, start, or end is null
+     */
     public void export(EventStore store, StatsTracker tracker,String sessionId, String studentId,Instant start, Instant end) throws IOException {
 
         // Retrieves the events collected during the session.
