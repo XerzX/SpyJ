@@ -23,7 +23,6 @@ public class JSONFormatter implements LogFormatter {
  * Serialises report data as readable JSON and includes null values.
  */
 private final Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
 /**
  * Creates a readable JSON report as UTF-8 bytes.
  *
