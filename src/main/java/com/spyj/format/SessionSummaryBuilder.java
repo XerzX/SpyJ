@@ -26,6 +26,9 @@ public class SessionSummaryBuilder {
  * @return a map containing the report's session summary
  * @throws IllegalArgumentException if end precedes start or a required
  *         statistics section is missing or is not a map
+  * @throws IllegalArgumentException if end precedes start or a required
+ *         statistics section is missing or is not a map
+ * @throws NullPointerException if tracker, start, or end is null
  */
     public Map<String, Object> build(StatsTracker tracker,String sessionId, String studentId, Instant start, Instant end) {
 
@@ -33,7 +36,15 @@ public class SessionSummaryBuilder {
             throw new IllegalArgumentException("End time cannot be before start time.");
         }
 
-        // Gets one copy of the current statistics.
+        /**
+         * Retrieves a named group of statistics.
+         *
+         * @param stats the map containing the statistics groups
+         * @param name the name of the required group
+         * @return the statistics map for the requested group
+         * @throws IllegalArgumentException if the group is missing or is not a map
+         * @throws NullPointerException if stats is null
+         */
         Map<String, Object> stats = tracker.getStats();
         //Statistic stored in separate groups
         Map<?, ?> compilation = getSection(stats, "Compilation");
