@@ -26,7 +26,7 @@ At session end, SpyJ exports a **timestamped JSON file** (with full event detail
 |------|------------|------|
 | Mykel Dedier | 816042057 | Extension Entry Point, Event Capture & Data Logging |
 | Caitlyn Maharaj | 816039787 | Data Formatting & Export |
-| Aidan Ramnarine | | Unit Testing & Quality Assurance |
+| Aidan Ramnarine | 816039422 | Unit Testing & Quality Assurance |
 
 ---
 
@@ -806,7 +806,7 @@ integration test.
 
 **Contributor:** Aidan Ramnarine - Unit Testing & Quality Assurance
 
-**Student ID:** 
+**Student ID:** 816039422
 
 **Package:** `src/test/java/com/spyj/`
 
