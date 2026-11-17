@@ -193,6 +193,10 @@ start target/reports/apidocs/index.html
 
 **File:** `src/main/java/com/spyj/SpyJ.java`
 
+**Contributor:** Mykel Dedier - Event Capture and Data Logging
+
+**Student ID:** 816042057
+
 `SpyJ` extends `bluej.extensions2.Extension` and serves as the plugin's lifecycle manager. BlueJ instantiates it automatically when the extension is loaded.
 
 ### Lifecycle Methods
