@@ -193,7 +193,7 @@ start target/reports/apidocs/index.html
 
 **File:** `src/main/java/com/spyj/SpyJ.java`
 
-**Contributor:** Mykel Dedier - Event Capture and Data Logging
+**Contributor:** Mykel Dedier
 
 **Student ID:** 816042057
 
